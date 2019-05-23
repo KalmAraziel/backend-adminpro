@@ -1,5 +1,7 @@
 var express = require('express');
 var bcrypt = require('bcryptjs');
+var jwt = require('jsonwebtoken');
+var mdwAutenticacion = require('../');
 // Iniciar variables
 var app = express();
 
@@ -28,6 +30,8 @@ app.get('/', (req, resp, next) => {
         }
     );   
 });
+
+
 //============================
 // Crear nuevo usuario
 //============================

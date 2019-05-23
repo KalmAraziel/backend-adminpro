@@ -16,6 +16,7 @@ app.use(bodyParser.json())
 // Importar Rutas
 var appRoutes = require('./routes/app');
 var usuarioRoutes = require('./routes/usuario');
+var loginRoutes = require('./routes/login');
 
 // Conexion a BD
 mongoose.connect('mongodb://localhost:27017/hospitalDB', {useNewUrlParser: true},
@@ -28,6 +29,7 @@ mongoose.connect('mongodb://localhost:27017/hospitalDB', {useNewUrlParser: true}
 //Rutas
 // url "/' se mapea a appRoutes
 app.use('/usuario', usuarioRoutes); 
+app.use('/login', loginRoutes);
 app.use('/', appRoutes);
 
 
