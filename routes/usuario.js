@@ -1,5 +1,5 @@
 var express = require('express');
-
+var bcrypt = require('bcryptjs');
 // Iniciar variables
 var app = express();
 
@@ -19,7 +19,7 @@ app.get('/', (req, resp, next) => {
                     mensaje: 'Error cargando usuarios',
                     errors: err
                 });
-            } 
+            }
             // Todo bien 
             resp.status(200).json({       
                 ok: true,
@@ -36,15 +36,15 @@ app.post('/',  (req, resp)  => {
     var usuario = new Usuario({
         nombre: body.nombre,
         email: body.email,
-        password: body.password,
+        password: bcrypt.hashSync(body.password, 10),
         img: body.img,
         role: body.role
     });
-    console.log(usuario);
+
     usuario.save( (err, usuarioGuardado) => {
         if(err) {
             console.log(err);
-            return resp.status(500).json({       
+            return resp.status(400).json({       
                 ok: false,
                 mensaje: 'Error al crear usuario',
                 errors: err
@@ -55,8 +55,86 @@ app.post('/',  (req, resp)  => {
             ok: true,
             usuario: usuarioGuardado
         });
-
     });    
 });
+//============================
+// Actualizar usuario
+//============================
+app.put('/:id', (req, resp) => {
+    var id = req.params.id;
+    var body = req.body;
+    Usuario.findById(id, (err, usuario) => {
+        if (err) { 
+            return resp.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar usuario',
+                errors: err
+            });
+        }
 
+        if ( !usuario ) {
+            return resp.status(400).json({
+                ok: false,
+                mensaje: 'El usuario con el id ' + id + 'no existe',
+                errors: { message: 'No existe un usuario con ese ID' }
+            });
+        }
+        
+        usuario.nombre = body.nombre;
+        usuario.email = body.email;
+        usuario.role = body.role;
+
+        usuario.save((err, usuarioGuardado)=>{
+            if (err) {
+                return resp.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar usuario',
+                    errors: err
+                });
+            }
+            usuarioGuardado.password = ":)";
+            // actualiza usuario   
+
+            resp.status(200).json({
+                ok: true,
+                usuario: usuarioGuardado
+            });
+        });
+    });
+});
+//============================
+// Eliminar usuario
+//============================
+app.delete('/:id', (req, resp) => {
+    // parametro por url
+    var id = req.params.id;
+    Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
+        
+        if (err) {
+            console.log(err);
+            return resp.status(500).json({
+                ok: false,
+                mensaje: 'Error al borrar usuario',
+                errors: err
+            });
+        }
+
+        if (!usuarioBorrado) {
+            console.log(err);
+            return resp.status(400).json({  
+                ok: false,
+                mensaje: 'No existe un usuario con ese ID',
+                errors: {
+                    message: 'No existe un usuario con ese ID'
+                }
+            });
+        }
+
+        // Creado correctamente
+        resp.status(200).json({
+            ok: true,
+            usuario: usuarioBorrado
+        });
+    });
+});
 module.exports = app;
