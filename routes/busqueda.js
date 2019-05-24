@@ -29,17 +29,14 @@ app.get('/coleccion/:tabla/:busqueda', ( req, res ) => {
             return res.status(400).json({
                 ok: false,
                 message: 'Los tipos de busqueda solo son : usuarios, medicos y hospitales',
-                error: {message: 'Tipo de tabla/coleccion no valido'}
-                
-            });
-            
+                error: {message: 'Tipo de tabla/coleccion no valido'}                
+            });            
     }
     // [tabla] toma el nombe de lo que tiene esa variable ej: medicos 
     promesa.then( data => {        
         res.status(200 ).json({
             ok: true,
-            [tabla]: data
-            
+            [tabla]: data            
         });
     });
 });
@@ -77,10 +74,8 @@ function buscarHospitales (busqueda, regex) {
                 reject('Error al cargar Hospitales ' + erro);
             }
             resolve(hospitales);
-
         });
-    });
-    
+    });    
 }
 
 function buscarMedicos (busqueda, regex) {
@@ -94,8 +89,7 @@ function buscarMedicos (busqueda, regex) {
             }
             resolve(medicos);
         });
-    });
-    
+    });    
 }
 
 function buscarUsuarios (busqueda, regex) {
@@ -107,7 +101,6 @@ function buscarUsuarios (busqueda, regex) {
                 reject(err);
             }
             resolve(usuarios);
-
         });
     });
     
