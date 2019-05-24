@@ -3,135 +3,137 @@ var mdwAutenticacion = require('../middlewares/autenticacion');
 // Iniciar variables
 var app = express();
 //Exportar Modelo
-var Hospital = require('../models/hospital');
-//============================
-// Obtener todos los Hospitals
-//============================
-app.get('/', (req, resp, next) => {  
-    var desde = req.query.desde || 0;
-    desde = Number(desde);
+var Medico = require('../models/medico');
 
-    Hospital.find({})
+//============================
+// Obtener todos los Medicos
+//============================
+app.get('/', (req, resp, next) => {    
+    var desde = req.query.desde || 0;
+    desde = Number(desde);    
+    Medico.find({})
     .skip(desde)
     .limit(5)
-    // inner join con tabla Usuario
     .populate('usuario', 'nombre email')
+    .populate('hospital', 'nombre')
     .exec(
-        (err, hospitales ) => {
+        (err, medicos ) => {
             if(err) {
                 return resp.status(500).json({       
                     ok: false,
-                    mensaje: 'Error cargando Hospitales',
+                    mensaje: 'Error cargando Medicos',
                     errors: err
                 });
             }
-            // total registros
-            Hospital.count({}, (err, count)=> {
-                // Todo bien 
+            // Todo bien
+            Medico.count({}, (err, count) => {
                 resp.status(200).json({       
                     ok: true,
                     total: count,
-                    hospitales
+                    medicos
                 });
-            });            
+            });
+            
         }
     );   
 });
 
 
 //============================
-// Crear nuevo Hospital
+// Crear nuevo Medico
 // segundo parametro verificamos token
 //============================
 app.post('/', mdwAutenticacion.verificacionToken , (req, resp)  => {
     var body = req.body;
-    var hospital = new Hospital({
-        nombre: body.nombre,               
-        usuario: req.usuario._id
+    var medico = new Medico({
+        nombre   : body.nombre,               
+        usuario  : req.usuario._id,       
+        hospital :  body.hospital
     });
 
-    hospital.save( (err, hospitalGuardado) => {
+    medico.save( (err, medicoGuardado) => {
         if(err) {
             console.log(err);
             return resp.status(400).json({       
                 ok: false,
-                mensaje: 'Error al crear Hospital',
+                mensaje: 'Error al crear Medico',
                 errors: err
             });
         }
         // Creado correctamente
         resp.status(201).json({       
             ok: true,
-            hospital: hospitalGuardado            
+            medico: medicoGuardado            
         });
     });    
 });
 //============================
-// Actualizar Hospital
+// Actualizar Medico
 //============================
 app.put('/:id',  mdwAutenticacion.verificacionToken ,(req, resp) => {
     var id = req.params.id;
     var body = req.body;
-    Hospital.findById(id, (err, hospital) => {
+    Medico.findById(id, (err, medico) => {
         if (err) { 
             return resp.status(500).json({
                 ok: false,
-                mensaje: 'Error al buscar Hospital',
+                mensaje: 'Error al buscar Medico',
                 errors: err
             });
         }
 
-        if ( !hospital ) {
+        if ( !medico ) {
             return resp.status(400).json({
                 ok: false,
-                mensaje: 'El hospital con el id ' + id + 'no existe',
-                errors: { message: 'No existe un Hospital con ese ID' }
+                mensaje: 'El medico con el id ' + id + 'no existe',
+                errors: { message: 'No existe un Medico con ese ID' }
             });
         }
         
-        hospital.nombre = body.nombre;        
-        hospital.usuario = req.usuario._id;
-        hospital.save((err, hospitalGuardado)=>{
+        medico.nombre = body.nombre;        
+        medico.usuario = req.usuario._id;
+        medico.hospital =  body.hospital;
+
+        medico.save((err, medicoGuardado)=>{
             if (err) {
                 return resp.status(400).json({
                     ok: false,
-                    mensaje: 'Error al actualizar Hospital',
+                    mensaje: 'Error al actualizar Medico',
                     errors: err
                 });
             }
-            // actualiza Hospital   
-
+            // actualiza Medico   
             resp.status(200).json({
                 ok: true,
-                hospital: hospitalGuardado
+                medico: medicoGuardado
             });
         });
     });
 });
 //============================
-// Eliminar Hospital
+// Eliminar Medico
 //============================
 app.delete('/:id', mdwAutenticacion.verificacionToken, (req, resp) => {
     // parametro por url
     var id = req.params.id;
-    Hospital.findByIdAndRemove(id, (err, hospitalBorrado) => {
+    Medico.findByIdAndRemove(id, (err, medicoBorrado) => {
         
         if (err) {
             console.log(err);
             return resp.status(500).json({
                 ok: false,
-                mensaje: 'Error al borrar Hospital',
+                mensaje: 'Error al borrar Medico',
                 errors: err
             });
         }
 
-        if (!hospitalBorrado) {
+        if (!medicoBorrado) {
             console.log(err);
             return resp.status(400).json({  
                 ok: false,
-                mensaje: 'No existe un Hospital con ese ID',
+                mensaje: 'No existe un Medico con ese ID',
                 errors: {
-                    message: 'No existe un Hospital con ese ID'
+                    message: 'No existe un Medico con ese ID'
                 }
             });
         }
@@ -139,7 +141,7 @@ app.delete('/:id', mdwAutenticacion.verificacionToken, (req, resp) => {
         // Creado correctamente
         resp.status(200).json({
             ok: true,
-            Hospital: hospitalBorrado
+            Medico: medicoBorrado
         });
     });
 });

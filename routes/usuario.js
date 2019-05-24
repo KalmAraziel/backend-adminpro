@@ -11,8 +11,13 @@ var Usuario = require('../models/usuario');
 // Obtener todos los usuarios
 //============================
 app.get('/', (req, resp, next) => {
+    
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
     // llamada select nombre email img role from table; 
     Usuario.find({}, 'nombre email img role')
+    .skip(desde)
+    .limit(5)
     .exec(
         (err, usuarios ) => {
             if(err) {
@@ -22,11 +27,17 @@ app.get('/', (req, resp, next) => {
                     errors: err
                 });
             }
-            // Todo bien 
-            resp.status(200).json({       
-                ok: true,
-                usuarios
+            // total registros
+            Usuario.count({}, (err, count)=> {
+                // Todo bien 
+                resp.status(200).json({       
+                    ok: true,
+                    total: count,
+                    usuarios
+                    
+                });
             });
+            
         }
     );   
 });
