@@ -15,12 +15,8 @@ exports.verificacionToken = (req, res, next) => {
                 errors: err
             });
         }
-        // next();
-
-        return res.status(401).json({       
-            ok: false,
-            mensaje: 'Token incorrecto',
-            decoded: decoded
-        });
+        // dejo en el request el usuario del token         
+        req.usuario = decoded.usuario;
+        next();    
     });
 };
